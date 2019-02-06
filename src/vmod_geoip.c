@@ -21,11 +21,10 @@
 #include "vcc_if.h"
 
 GeoIP *city_gi;
+char buf[100];
 
-    int
-vmod_event(VRT_CTX, struct vmod_priv *pp, enum vcl_event_e evt)
+int vmod_event(VRT_CTX, struct vmod_priv *pp, enum vcl_event_e evt)
 {
-
     CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 
     if (pp->priv == NULL) {
@@ -36,6 +35,9 @@ vmod_event(VRT_CTX, struct vmod_priv *pp, enum vcl_event_e evt)
          * adding * the flag "MAP_32BIT" to the mmap call. MMAP is not
          * avail for WIN32.
          */
+
+        // TBD: Set database location in initialization?
+        // TBD: Use Workspace memory allocation?
         city_gi = GeoIP_open("/usr/share/GeoIP/GeoIPCity.dat", GEOIP_MMAP_CACHE);
 
         pp->priv = GeoIP_new(GEOIP_MMAP_CACHE);
@@ -47,10 +49,8 @@ vmod_event(VRT_CTX, struct vmod_priv *pp, enum vcl_event_e evt)
     return (0);
 }
 
-char buf[100];
 
-    static const char *
-vmod_latlong_by_addr(GeoIP *gi, const char *ip)
+static const char* vmod_latlong_by_addr(GeoIP *gi, const char *ip)
 {
     (void)*gi; // Use city_gi instead.
 
@@ -65,8 +65,7 @@ vmod_latlong_by_addr(GeoIP *gi, const char *ip)
     return buf;
 }
 
-    static const char *
-vmod_region_name_by_addr(GeoIP *gi, const char *ip)
+static const char * vmod_region_name_by_addr(GeoIP *gi, const char *ip)
 {
     GeoIPRegion *gir;
     const char *region = NULL;
@@ -90,9 +89,9 @@ vmod_region_name_by_addr(GeoIP *gi, const char *ip)
     AN(pp->priv);						\
     \
     if (ip)							\
-    str = func(pp->priv, ip);			\
+      str = func(pp->priv, ip);			\
     if (str == NULL)					\
-    str = "Unknown";				\
+      str = "Unknown";				\
     return (str);						\
 }
 GEOIP_PROPERTY(country_code, GeoIP_country_code_by_addr);
