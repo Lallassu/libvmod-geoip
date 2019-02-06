@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include <GeoIP.h>
+#include <GeoIPCity.h>
 
 #include "cache/cache.h"
 #include "vcl.h"
@@ -18,6 +19,8 @@
 #endif
 
 #include "vcc_if.h"
+
+GeoIP *city_gi;
 
 int
 vmod_event(VRT_CTX, struct vmod_priv *pp, enum vcl_event_e evt)
@@ -33,6 +36,8 @@ vmod_event(VRT_CTX, struct vmod_priv *pp, enum vcl_event_e evt)
 		 * adding * the flag "MAP_32BIT" to the mmap call. MMAP is not
 		 * avail for WIN32.
 		 */
+        city_gi = GeoIP_open("/usr/share/GeoIP/GeoIPCity.dat", GEOIP_MMAP_CACHE);
+
 		pp->priv = GeoIP_new(GEOIP_MMAP_CACHE);
 		AN(pp->priv);
 		pp->free = (vmod_priv_free_f *)GeoIP_delete;
@@ -40,6 +45,24 @@ vmod_event(VRT_CTX, struct vmod_priv *pp, enum vcl_event_e evt)
 	}
 
 	return (0);
+}
+
+char buf[100];
+
+static const char *
+vmod_latlong_by_addr(GeoIP *gi, const char *ip)
+{
+    (void)*gi; // Use city_gi instead.
+
+	GeoIPRecord *gir;
+
+    gir = GeoIP_record_by_addr(city_gi, ip);
+	if (gir == NULL)
+		return (NULL);
+    
+    sprintf(buf, "%f,%f", gir->latitude, gir->longitude);
+	GeoIPRecord_delete(gir);
+	return buf;
 }
 
 static const char *
@@ -75,4 +98,5 @@ vmod_region_name_by_addr(GeoIP *gi, const char *ip)
 GEOIP_PROPERTY(country_code, GeoIP_country_code_by_addr);
 GEOIP_PROPERTY(country_name, GeoIP_country_name_by_addr);
 GEOIP_PROPERTY(region_name, vmod_region_name_by_addr);
+GEOIP_PROPERTY(latlong, vmod_latlong_by_addr);
 #undef GEOIP_PROPERTY

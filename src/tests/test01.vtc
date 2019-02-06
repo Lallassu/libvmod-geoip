@@ -11,9 +11,11 @@ varnish v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.X-Country-Code = geoip.country_code("127.0.0.1");
 		set resp.http.X-Country-Name = geoip.country_name("127.0.0.1");
+		set resp.http.X-Country-LatLong = geoip.latlong("127.0.0.1");
 
 		set resp.http.X-IP-Country-Code = geoip.country_code(client.ip);
 		set resp.http.X-IP-Country-Name = geoip.country_name(client.ip);
+		set resp.http.X-IP-Country-LatLong = geoip.latlong(client.ip);
 	}
 } -start
 
@@ -22,6 +24,8 @@ client c1 {
 	rxresp
 	expect resp.http.X-Country-Code == Unknown
 	expect resp.http.X-Country-Name == Unknown
+	expect resp.http.X-Country-LatLong == Unknown
 	expect resp.http.X-IP-Country-Code == Unknown
 	expect resp.http.X-IP-Country-Name == Unknown
+	expect resp.http.X-IP-Country-LatLong == Unknown
 } -run

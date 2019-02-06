@@ -38,3 +38,6 @@ $Function STRING country_name(PRIV_VCL, STRING)
 
 ## look up (english) region names
 #$Function STRING region_name(PRIV_VCL, STRING)
+
+## look up latitude and longitude for IP as a comma separated STRING ("lat,lon").
+$Function STRING latlong(PRIV_VCL, STRING)
