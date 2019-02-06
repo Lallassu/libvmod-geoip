@@ -36,7 +36,7 @@ vmod_event(VRT_CTX, struct vmod_priv *pp, enum vcl_event_e evt)
 		 * adding * the flag "MAP_32BIT" to the mmap call. MMAP is not
 		 * avail for WIN32.
 		 */
-        city_gi = GeoIP_open("/usr/share/GeoIP/GeoIPCity.dat", GEOIP_MMAP_CACHE);
+                city_gi = GeoIP_open("/usr/share/GeoIP/GeoIPCity.dat", GEOIP_MMAP_CACHE);
 
 		pp->priv = GeoIP_new(GEOIP_MMAP_CACHE);
 		AN(pp->priv);
@@ -56,11 +56,11 @@ vmod_latlong_by_addr(GeoIP *gi, const char *ip)
 
 	GeoIPRecord *gir;
 
-    gir = GeoIP_record_by_addr(city_gi, ip);
+        gir = GeoIP_record_by_addr(city_gi, ip);
 	if (gir == NULL)
 		return (NULL);
     
-    sprintf(buf, "%f,%f", gir->latitude, gir->longitude);
+        sprintf(buf, "%f,%f", gir->latitude, gir->longitude);
 	GeoIPRecord_delete(gir);
 	return buf;
 }
