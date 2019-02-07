@@ -20,8 +20,10 @@
 
 #include "vcc_if.h"
 
+#define MAX_BUF_SIZE 100
+
+char buf[MAX_BUF_SIZE];
 GeoIP *city_gi;
-char buf[100];
 
 int vmod_event(VRT_CTX, struct vmod_priv *pp, enum vcl_event_e evt)
 {
@@ -39,6 +41,7 @@ int vmod_event(VRT_CTX, struct vmod_priv *pp, enum vcl_event_e evt)
         // TBD: Set database location in initialization?
         // TBD: Use Workspace memory allocation?
         city_gi = GeoIP_open("/usr/share/GeoIP/GeoIPCity.dat", GEOIP_MMAP_CACHE);
+        AN(city_gi);
 
         pp->priv = GeoIP_new(GEOIP_MMAP_CACHE);
         AN(pp->priv);
@@ -49,8 +52,8 @@ int vmod_event(VRT_CTX, struct vmod_priv *pp, enum vcl_event_e evt)
     return (0);
 }
 
-
-static const char* vmod_latlong_by_addr(GeoIP *gi, const char *ip)
+static const char *
+vmod_latlong_by_addr(GeoIP *gi, const char *ip)
 {
     (void)*gi; // Use city_gi instead.
 
@@ -60,12 +63,13 @@ static const char* vmod_latlong_by_addr(GeoIP *gi, const char *ip)
     if (gir == NULL)
         return (NULL);
 
-    sprintf(buf, "%f,%f", gir->latitude, gir->longitude);
+    snprintf(buf, MAX_BUF_SIZE, "%f,%f", gir->latitude, gir->longitude);
     GeoIPRecord_delete(gir);
     return buf;
 }
 
-static const char * vmod_region_name_by_addr(GeoIP *gi, const char *ip)
+static const char *
+vmod_region_name_by_addr(GeoIP *gi, const char *ip)
 {
     GeoIPRegion *gir;
     const char *region = NULL;
