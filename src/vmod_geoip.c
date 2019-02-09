@@ -29,7 +29,8 @@ int vmod_event(VRT_CTX, struct vmod_priv *pp, enum vcl_event_e evt)
 {
     CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 
-    if (pp->priv == NULL) {
+    if (pp->priv == NULL)
+    {
         xxxassert(evt == VCL_EVENT_LOAD);
 
         /* The README says:
@@ -83,21 +84,21 @@ vmod_region_name_by_addr(GeoIP *gi, const char *ip)
     return (region);
 }
 
-#define GEOIP_PROPERTY(prop, func)					\
-    VCL_STRING							\
-    vmod_##prop(VRT_CTX, struct vmod_priv *pp, VCL_STRING ip)	\
-{								\
-    const char *str = NULL;					\
-    \
-    CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);			\
-    AN(pp->priv);						\
-    \
-    if (ip)							\
-      str = func(pp->priv, ip);			\
-    if (str == NULL)					\
-      str = "Unknown";				\
-    return (str);						\
-}
+#define GEOIP_PROPERTY(prop, func)                            \
+    VCL_STRING                                                \
+    vmod_##prop(VRT_CTX, struct vmod_priv *pp, VCL_STRING ip) \
+    {                                                         \
+        const char *str = NULL;                               \
+                                                              \
+        CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);                \
+        AN(pp->priv);                                         \
+                                                              \
+        if (ip)                                               \
+            str = func(pp->priv, ip);                         \
+        if (str == NULL)                                      \
+            str = "Unknown";                                  \
+        return (str);                                         \
+    }
 GEOIP_PROPERTY(country_code, GeoIP_country_code_by_addr);
 GEOIP_PROPERTY(country_name, GeoIP_country_name_by_addr);
 GEOIP_PROPERTY(region_name, vmod_region_name_by_addr);
